@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import OrderTab from "./components/OrderTab.svelte";
   import KitchenTab from "./components/KitchenTab.svelte";
+  import FoodManagementTab from "./components/FoodManagementTab.svelte";
+  import SetupTab from "./components/SetupTab.svelte";
   import UserTab from "./components/UserTab.svelte";
   import ReportTab from "./components/ReportTab.svelte";
 
@@ -9,22 +11,32 @@
   let products = $state([]);
   let orders = $state([]);
   let orderItems = $state([]);
+  let setupData = $state({ menu_categories: [], note_groups: [] });
+
+  const tabs = [
+    { id: "order", label: "ขายหน้าร้าน", short: "ขาย", icon: "POS", title: "หน้าร้านพร้อมรับออเดอร์" },
+    { id: "kitchen", label: "ครัว", short: "ครัว", icon: "KDS", title: "จอครัวและสถานะอาหาร" },
+    { id: "foods", label: "เมนูอาหาร", short: "เมนู", icon: "FOOD", title: "จัดการเมนูอาหาร" },
+    { id: "setup", label: "ตั้งค่า", short: "ตั้งค่า", icon: "SET", title: "ตั้งค่าข้อมูลพื้นฐาน" },
+    { id: "users", label: "ผู้ใช้", short: "ผู้ใช้", icon: "TEAM", title: "ทีมและสิทธิ์เข้าใช้งาน" },
+    { id: "reports", label: "รายงาน", short: "รายงาน", icon: "SALE", title: "ยอดขายและภาพรวม" }
+  ];
 
   let pendingCount = $derived(orders.filter(order => order.status === "pending").length);
   let cookingCount = $derived(orders.filter(order => order.status === "cooking").length);
   let completedCount = $derived(orders.filter(order => order.status === "completed").length);
-
-  const tabs = [
-    { id: "order", label: "ขายหน้าร้าน", short: "ขาย", icon: "POS" },
-    { id: "kitchen", label: "ครัว", short: "ครัว", icon: "KDS" },
-    { id: "users", label: "ผู้ใช้", short: "ผู้ใช้", icon: "TEAM" },
-    { id: "reports", label: "รายงาน", short: "รายงาน", icon: "SALE" }
-  ];
+  let activeTitle = $derived(tabs.find(tab => tab.id === activeTab)?.title ?? "หน้าร้านพร้อมรับออเดอร์");
 
   onMount(async () => {
+    await loadSetup();
     await loadProducts();
     await loadOrders();
   });
+
+  async function loadSetup() {
+    const res = await fetch("/api/setup");
+    setupData = await res.json();
+  }
 
   async function loadProducts() {
     const res = await fetch("/api/products");
@@ -93,6 +105,100 @@
     });
     await loadOrders();
   }
+
+  async function createProduct(product) {
+    await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product)
+    });
+    await loadProducts();
+  }
+
+  async function updateProduct(productId, product) {
+    await fetch(`/api/products/${productId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product)
+    });
+    await loadProducts();
+  }
+
+  async function archiveProduct(productId) {
+    await fetch(`/api/products/${productId}`, {
+      method: "DELETE"
+    });
+    await loadProducts();
+  }
+
+  async function createMenuCategory(category) {
+    await fetch("/api/setup/menu-categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category)
+    });
+    await loadSetup();
+  }
+
+  async function updateMenuCategory(categoryId, category) {
+    await fetch(`/api/setup/menu-categories/${categoryId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category)
+    });
+    await loadSetup();
+  }
+
+  async function archiveMenuCategory(categoryId) {
+    await fetch(`/api/setup/menu-categories/${categoryId}`, { method: "DELETE" });
+    await loadSetup();
+  }
+
+  async function createNoteGroup(group) {
+    await fetch("/api/setup/note-groups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(group)
+    });
+    await loadSetup();
+  }
+
+  async function updateNoteGroup(groupId, group) {
+    await fetch(`/api/setup/note-groups/${groupId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(group)
+    });
+    await loadSetup();
+  }
+
+  async function archiveNoteGroup(groupId) {
+    await fetch(`/api/setup/note-groups/${groupId}`, { method: "DELETE" });
+    await loadSetup();
+  }
+
+  async function createNoteOption(option) {
+    await fetch("/api/setup/note-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(option)
+    });
+    await loadSetup();
+  }
+
+  async function updateNoteOption(optionId, option) {
+    await fetch(`/api/setup/note-options/${optionId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(option)
+    });
+    await loadSetup();
+  }
+
+  async function archiveNoteOption(optionId) {
+    await fetch(`/api/setup/note-options/${optionId}`, { method: "DELETE" });
+    await loadSetup();
+  }
 </script>
 
 <div class="app-shell">
@@ -126,10 +232,11 @@
     <header class="topbar panel">
       <div>
         <p class="eyebrow">Today Service</p>
-        <h2>{activeTab === "order" ? "หน้าร้านพร้อมรับออเดอร์" : activeTab === "kitchen" ? "จอครัวและสถานะอาหาร" : activeTab === "users" ? "ทีมและสิทธิ์เข้าใช้งาน" : "ยอดขายและภาพรวม"}</h2>
+        <h2>{activeTitle}</h2>
       </div>
       <div class="topbar-stats" aria-label="สรุปสถานะ">
         <span>{products.length} เมนู</span>
+        <span>{setupData.note_groups.length} จุดสังเกต</span>
         <span>{orders.length} ออเดอร์</span>
         <span>{orderItems.length} ในตะกร้า</span>
       </div>
@@ -137,9 +244,24 @@
 
     <section class="tab-content">
     {#if activeTab === "order"}
-      <OrderTab {products} {orders} {orderItems} {addToOrder} {updateCartItem} {removeFromOrder} {clearOrder} {submitOrder} {updateOrderStatus} />
+      <OrderTab {products} {orders} {orderItems} noteGroups={setupData.note_groups} {addToOrder} {updateCartItem} {removeFromOrder} {clearOrder} {submitOrder} {updateOrderStatus} />
     {:else if activeTab === "kitchen"}
       <KitchenTab {orders} {updateOrderStatus} />
+    {:else if activeTab === "foods"}
+      <FoodManagementTab {products} menuCategories={setupData.menu_categories} {createProduct} {updateProduct} {archiveProduct} />
+    {:else if activeTab === "setup"}
+      <SetupTab
+        {setupData}
+        {createMenuCategory}
+        {updateMenuCategory}
+        {archiveMenuCategory}
+        {createNoteGroup}
+        {updateNoteGroup}
+        {archiveNoteGroup}
+        {createNoteOption}
+        {updateNoteOption}
+        {archiveNoteOption}
+      />
     {:else if activeTab === "users"}
       <UserTab />
     {:else if activeTab === "reports"}
@@ -325,7 +447,7 @@
     left: 12px;
     z-index: 10;
     display: none;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 6px;
     padding: 8px;
   }

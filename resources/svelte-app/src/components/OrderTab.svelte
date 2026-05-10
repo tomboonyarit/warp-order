@@ -8,15 +8,57 @@
     removeFromOrder,
     clearOrder,
     submitOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    noteGroups = []
   } = $props();
 
   let customerName = $state("");
-  let distinctiveNotes = $state("");
+  let manualNotes = $state("");
+  let selectedNotes = $state({});
   let remark = $state("");
 
   let pendingOrders = $derived(orders.filter(o => o.status === "pending"));
   let cartTotal = $derived(orderItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0));
+  let selectedNoteText = $derived(buildDistinctiveNotes());
+
+  function toggleNoteGroup(group) {
+    if (selectedNotes[group.id]) {
+      const nextNotes = { ...selectedNotes };
+      delete nextNotes[group.id];
+      selectedNotes = nextNotes;
+      return;
+    }
+
+    selectedNotes = {
+      ...selectedNotes,
+      [group.id]: {
+        group: group.name,
+        option: ""
+      }
+    };
+  }
+
+  function selectNoteOption(group, option) {
+    selectedNotes = {
+      ...selectedNotes,
+      [group.id]: {
+        group: group.name,
+        option: option.label
+      }
+    };
+  }
+
+  function buildDistinctiveNotes() {
+    const quickNotes = Object.values(selectedNotes)
+      .map(note => note.option ? `${note.group}: ${note.option}` : note.group)
+      .filter(Boolean);
+
+    if (manualNotes.trim()) {
+      quickNotes.push(manualNotes.trim());
+    }
+
+    return quickNotes.join(", ");
+  }
 
   function handleSubmit() {
     if (orderItems.length === 0) {
@@ -24,9 +66,10 @@
       return;
     }
 
-    submitOrder(customerName, distinctiveNotes, remark);
+    submitOrder(customerName, selectedNoteText, remark);
     customerName = "";
-    distinctiveNotes = "";
+    manualNotes = "";
+    selectedNotes = {};
     remark = "";
   }
 
@@ -97,9 +140,39 @@
         ชื่อลูกค้า
         <input type="text" placeholder="เช่น คุณต้อม" bind:value={customerName} />
       </label>
+      <div class="quick-notes">
+        <div class="quick-notes-head">
+          <div>
+            <span>จุดสังเกตเร็ว</span>
+            <strong>{selectedNoteText || "ยังไม่ได้เลือก"}</strong>
+          </div>
+        </div>
+
+        <div class="note-groups" aria-label="เลือกประเภทจุดสังเกต">
+          {#each noteGroups as group (group.id)}
+            <button type="button" class:active={Boolean(selectedNotes[group.id])} onclick={() => toggleNoteGroup(group)}>
+              {group.name}
+            </button>
+          {/each}
+        </div>
+
+        {#each noteGroups.filter(group => selectedNotes[group.id]) as group (group.id)}
+          <div class="note-options">
+            <p>{group.prompt || `เลือก${group.name}`}</p>
+            <div>
+              {#each group.options as option (option.id)}
+                <button type="button" class:active={selectedNotes[group.id]?.option === option.label} onclick={() => selectNoteOption(group, option)}>
+                  {option.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
+
       <label>
-        จุดสังเกต
-        <input type="text" placeholder="เสื้อแดง โต๊ะ 3 หมวกดำ" bind:value={distinctiveNotes} />
+        จุดสังเกตเพิ่มเติม
+        <input type="text" placeholder="เช่น ถือถุงสีแดง ยืนหน้าร้าน" bind:value={manualNotes} />
       </label>
       <label>
         หมายเหตุ
@@ -161,8 +234,15 @@
   .order-workspace {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 390px;
+    grid-template-areas:
+      "menu cart"
+      "queue cart";
     gap: 18px;
     align-items: start;
+  }
+
+  .menu-panel {
+    grid-area: menu;
   }
 
   .menu-panel,
@@ -172,12 +252,13 @@
   }
 
   .cart-panel {
+    grid-area: cart;
     position: sticky;
     top: 22px;
   }
 
   .queue-panel {
-    grid-column: 1 / -1;
+    grid-area: queue;
   }
 
   .section-head {
@@ -334,6 +415,72 @@
     margin-top: 16px;
   }
 
+  .quick-notes {
+    display: grid;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.56);
+  }
+
+  .quick-notes-head span,
+  .quick-notes-head strong {
+    display: block;
+  }
+
+  .quick-notes-head span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .quick-notes-head strong {
+    margin-top: 4px;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .note-groups,
+  .note-options div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .note-groups button,
+  .note-options button {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 11px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .note-groups button.active,
+  .note-options button.active {
+    color: #221707;
+    border-color: rgba(242, 159, 5, 0.55);
+    background: #fff1d2;
+  }
+
+  .note-options {
+    display: grid;
+    gap: 7px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+
+  .note-options p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+  }
+
   label {
     display: grid;
     gap: 6px;
@@ -455,6 +602,10 @@
   @media (max-width: 1180px) {
     .order-workspace {
       grid-template-columns: 1fr;
+      grid-template-areas:
+        "menu"
+        "cart"
+        "queue";
     }
 
     .cart-panel {
