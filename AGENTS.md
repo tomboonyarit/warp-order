@@ -50,7 +50,7 @@
     Apply: ทำการแก้ไขเฉพาะจุด
     Verify: รัน Linter/Test
     Report: แจ้งผู้ใช้ว่าแก้จุดไหนไปบ้างพร้อมเหตุผล
-## database schema changes
+### database schema changes
     เนื่องจากการแก้ไข Schema เป็นการเปลี่ยนแปลงโครงสร้างที่ย้อนกลับได้ยากและกระทบต่อข้อมูล Agent ต้องปฏิบัติตามกฎเหล็กดังนี้:
     1. Pre-Change Analysis & Mapping
     Schema Discovery: Agent ต้องดึงโครงสร้างปัจจุบัน (Table, Column, Index, Constraints) และ ER Diagram (ถ้ามี) มาวิเคราะห์ความสัมพันธ์ (Relationships) ทั้งหมดก่อนเริ่มวางแผน
@@ -70,6 +70,8 @@
     Dry Run: หาก Tool รองรับ Agent ต้องทำการรันในโหมด Dry Run เพื่อดูคำสั่ง SQL ที่จะเกิดขึ้นจริงก่อนกดยืนยัน
     Relationship Integrity: หลังแก้ Schema ต้องตรวจสอบว่า Foreign Keys และ Indexes ยังคงทำงานถูกต้องและไม่เกิดคอขวด (Performance Bottleneck)
 
+    Agent should never perform Schema changes on a production database without an explicit 'Approval' from a human administrator.
+
     Example of Database Change Protocol
     ขั้นตอนการดำเนินการ
     1. Inspectอ่าน Schema ปัจจุบันและเช็คจำนวนแถวข้อมูลเบื้องต้น
@@ -78,6 +80,6 @@
     4. Testรัน Migration ใน Database จำลอง (Staging/Dev)
     5. Deployรัน Migration ใน Prod พร้อมบันทึก Log และแผน Rollback
 
-## Golden Rule of Editing
+#### Golden Rule of Editing
     "Never delete code you don't fully understand, and never fix what isn't broken unless explicitly instructed."
     (ห้ามลบ Code ที่ไม่เข้าใจ และห้ามแก้ส่วนที่ไม่ได้พังเว้นแต่จะมีคำสั่งชัดเจน)
