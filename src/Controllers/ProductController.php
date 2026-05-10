@@ -9,7 +9,7 @@ class ProductController
     public function index(): string
     {
         $db = Connection::getInstance();
-        $stmt = $db->query("SELECT * FROM products WHERE is_active = true ORDER BY name");
+        $stmt = $db->query("SELECT * FROM products ORDER BY name");
         $products = $stmt->fetchAll();
         
         return json_encode($products);

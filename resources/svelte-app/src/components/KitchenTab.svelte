@@ -1,119 +1,184 @@
 <script>
-  export let orders;
-  export let updateOrderStatus;
+  let { orders, updateOrderStatus } = $props();
 
-  $: kitchenOrders = orders.filter(o => o.status === 'pending' || o.status === 'cooking');
+  let kitchenOrders = $derived(orders.filter(o => o.status === "pending" || o.status === "cooking"));
 </script>
 
-<div class="kitchen-tab">
-  <h2>คิวอาหารในครัว</h2>
-  
-  {#each kitchenOrders as order}
-    <div class="order-card {order.status}">
-      <div class="order-header">
-        <span class="queue-number">คิว #{order.queue_number}</span>
-        <span class="status {order.status}">{order.status === 'pending' ? 'รอ' : 'กำลังทำ'}</span>
-      </div>
-      
-      {#if order.customer_name}
-        <div class="customer-name">{order.customer_name}</div>
-      {/if}
-      
-      {#if order.distinctive_notes}
-        <div class="notes">{order.distinctive_notes}</div>
-      {/if}
-      
-      <div class="order-items">
-        {#each order.items as item}
-          <span class="item">{item.name} x {item.quantity}</span>
-        {/each}
-      </div>
-      
-      <div class="order-actions">
-        {#if order.status === 'pending'}
-          <button class="start-btn" on:click={() => updateOrderStatus(order.id, 'cooking')}>
-            เริ่มทำ
-          </button>
-        {:else}
-          <button class="complete-btn" on:click={() => updateOrderStatus(order.id, 'completed')}>
-            เสร็จ
-          </button>
-        {/if}
-      </div>
+<section class="kitchen-board panel">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Kitchen Display</p>
+      <h2 class="section-title">คิวอาหารในครัว</h2>
+      <p class="section-subtitle">แยกคิวรอทำและกำลังทำให้ทีมครัวมองเห็นทันที</p>
     </div>
-  {/each}
-  
+    <div class="board-count">{kitchenOrders.length} รายการ</div>
+  </div>
+
   {#if kitchenOrders.length === 0}
-    <div class="empty">ไม่มีคิวอาหาร</div>
+    <div class="empty-state">ไม่มีคิวอาหารค้างอยู่</div>
+  {:else}
+    <div class="kitchen-grid">
+      {#each kitchenOrders as order (order.id)}
+        <article class="ticket {order.status}">
+          <div class="ticket-head">
+            <div>
+              <span>คิว</span>
+              <strong>#{order.queue_number}</strong>
+            </div>
+            <span class="status {order.status}">{order.status === "pending" ? "รอเริ่ม" : "กำลังทำ"}</span>
+          </div>
+
+          {#if order.customer_name}
+            <h3>{order.customer_name}</h3>
+          {/if}
+
+          {#if order.distinctive_notes}
+            <p class="notes">{order.distinctive_notes}</p>
+          {/if}
+
+          <div class="items-list">
+            {#each order.items as item (item.id)}
+              <div>
+                <span>{item.name}</span>
+                <strong>x{item.quantity}</strong>
+              </div>
+            {/each}
+          </div>
+
+          {#if order.status === "pending"}
+            <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "cooking")}>เริ่มทำ</button>
+          {:else}
+            <button class="primary-action" onclick={() => updateOrderStatus(order.id, "completed")}>เสร็จแล้ว</button>
+          {/if}
+        </article>
+      {/each}
+    </div>
   {/if}
-</div>
+</section>
 
 <style>
-  .order-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px;
-    margin: 8px 0;
-    background: white;
+  .kitchen-board {
+    padding: 24px;
   }
-  .order-card.pending {
-    border-left: 4px solid #ffc107;
-  }
-  .order-card.cooking {
-    border-left: 4px solid #007bff;
-  }
-  .order-header {
+
+  .section-head {
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
-    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
   }
+
+  .board-count {
+    border-radius: 999px;
+    padding: 9px 13px;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 900;
+    background: var(--blue-soft);
+  }
+
+  .kitchen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .ticket {
+    display: grid;
+    gap: 14px;
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.68);
+    box-shadow: 0 14px 34px rgba(45, 35, 26, 0.08);
+  }
+
+  .ticket.pending {
+    border-left: 8px solid var(--brand);
+  }
+
+  .ticket.cooking {
+    border-left: 8px solid var(--blue);
+  }
+
+  .ticket-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .ticket-head span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .ticket-head strong {
+    display: block;
+    font-size: 38px;
+    line-height: 0.95;
+  }
+
   .status {
+    border-radius: 999px;
+    padding: 7px 10px;
     font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 12px;
+    font-weight: 900;
   }
+
   .status.pending {
-    background: #fff3cd;
-    color: #856404;
+    color: var(--brand-dark);
+    background: #fff1d2;
   }
+
   .status.cooking {
-    background: #cce5ff;
-    color: #004085;
+    color: var(--blue);
+    background: var(--blue-soft);
   }
-  .customer-name {
-    font-weight: 500;
-    margin: 4px 0;
+
+  h3 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.03em;
   }
+
   .notes {
-    font-size: 12px;
-    color: #666;
-    background: #f8f9fa;
-    padding: 4px 8px;
-    border-radius: 4px;
-    margin: 4px 0;
+    margin: 0;
+    border-radius: 16px;
+    padding: 10px 12px;
+    color: var(--muted);
+    font-weight: 800;
+    background: rgba(33, 27, 22, 0.06);
   }
-  .order-items {
-    font-size: 12px;
-    color: #888;
-    margin: 4px 0;
+
+  .items-list {
+    display: grid;
+    gap: 8px;
   }
-  .start-btn, .complete-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+
+  .items-list div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 16px;
+    padding: 11px 12px;
+    background: rgba(255, 255, 255, 0.7);
   }
-  .start-btn {
-    background: #007bff;
-    color: white;
+
+  .items-list span {
+    font-weight: 800;
   }
-  .complete-btn {
-    background: #28a745;
-    color: white;
-  }
-  .empty {
-    text-align: center;
-    padding: 20px;
-    color: #888;
+
+  @media (max-width: 640px) {
+    .kitchen-board {
+      padding: 16px;
+      border-radius: 22px;
+    }
+
+    .section-head {
+      flex-direction: column;
+    }
   }
 </style>

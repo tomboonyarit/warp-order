@@ -46,20 +46,18 @@ if (strpos($path, $api) === 0) {
             }
             break;
             
-        case '/orders/status':
-            require_once __DIR__ . '/../src/Controllers/OrderController.php';
-            $controller = new \TomOrder\Pos\Controllers\OrderController();
-            if ($method === 'PUT') {
-                $input = json_decode(file_get_contents('php://input'), true);
-                $pathParts = explode('/', $route);
-                $id = $pathParts[2] ?? null;
-                echo $controller->updateStatus($id, $input);
-            }
-            break;
-            
         default:
-            http_response_code(404);
-            echo json_encode(['error' => 'Not found']);
+            if (preg_match('#^/orders/status/(\d+)$#', $route, $matches)) {
+                require_once __DIR__ . '/../src/Controllers/OrderController.php';
+                $controller = new \TomOrder\Pos\Controllers\OrderController();
+                if ($method === 'PUT') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+                    echo $controller->updateStatus($matches[1], $input);
+                }
+            } else {
+                http_response_code(404);
+                echo json_encode(['error' => 'Not found']);
+            }
     }
 } else {
     http_response_code(404);

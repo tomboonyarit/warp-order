@@ -68,7 +68,7 @@ class OrderController
             $db->commit();
             
             return json_encode(['id' => $orderId, 'queue_number' => $queueNumber, 'status' => 'pending']);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $db->rollBack();
             return json_encode(['error' => $e->getMessage()]);
         }
