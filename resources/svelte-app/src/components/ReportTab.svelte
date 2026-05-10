@@ -1,4 +1,6 @@
 <script>
+  import { t } from "../lib/i18n.svelte.js";
+
   let { orders } = $props();
 
   let completedOrders = $derived(orders.filter(o => o.status === "completed"));
@@ -14,47 +16,47 @@
 <section class="report-board panel">
   <div class="section-head">
     <div>
-      <p class="eyebrow">Daily Snapshot</p>
-      <h2 class="section-title">รายงานยอดขาย</h2>
-      <p class="section-subtitle">ภาพรวมออเดอร์ที่เสร็จแล้วและยอดขายหน้าร้าน</p>
+      <p class="eyebrow">{t("report.eyebrow")}</p>
+      <h2 class="section-title">{t("report.title")}</h2>
+      <p class="section-subtitle">{t("report.subtitle")}</p>
     </div>
     <label class="date-filter" for="report-date">
-      เลือกวัน
+      {t("report.date_label")}
       <input id="report-date" type="date" bind:value={selectedDate} />
     </label>
   </div>
 
   <div class="summary">
     <div class="summary-card hero">
-      <span>ยอดขายรวม</span>
+      <span>{t("report.total_sales")}</span>
       <strong>{totalRevenue.toLocaleString()}฿</strong>
     </div>
     <div class="summary-card">
-      <span>จำนวนออเดอร์</span>
+      <span>{t("report.order_count")}</span>
       <strong>{completedOrders.length}</strong>
     </div>
     <div class="summary-card">
-      <span>เฉลี่ยต่อออเดอร์</span>
+      <span>{t("report.average")}</span>
       <strong>{averageOrder.toLocaleString(undefined, { maximumFractionDigits: 0 })}฿</strong>
     </div>
   </div>
 
   <div class="sales-list">
     <div class="list-head">
-      <h3>รายการขายล่าสุด</h3>
-      <span>{completedOrders.length} รายการ</span>
+      <h3>{t("report.list_title")}</h3>
+      <span>{t("report.list_count", { n: completedOrders.length })}</span>
     </div>
 
     {#if completedOrders.length === 0}
-      <div class="empty-state">ยังไม่มีออเดอร์ที่เสร็จแล้ว</div>
+      <div class="empty-state">{t("report.list_empty")}</div>
     {:else}
       {#each completedOrders as order (order.id)}
         <div class="sales-item">
           <div>
-            <strong>คิว #{order.queue_number}</strong>
-            <span>{order.customer_name || "ลูกค้าหน้าร้าน"}</span>
+            <strong>{t("report.list_queue")} #{order.queue_number}</strong>
+            <span>{order.customer_name || t("report.list_customer_fallback")}</span>
           </div>
-          <span class="items-count">{order.items.length} รายการ</span>
+          <span class="items-count">{t("report.list_count", { n: order.items.length })}</span>
           <strong class="total">{order.items.reduce((s, i) => s + (Number(i.price) * Number(i.quantity)), 0).toLocaleString()}฿</strong>
         </div>
       {/each}

@@ -1,9 +1,11 @@
 <script>
+  import { t } from "../lib/i18n.svelte.js";
+
   let { products, menuCategories = [], createProduct, updateProduct, archiveProduct } = $props();
 
   let name = $state("");
   let price = $state("");
-  let category = $state("เมนูหลัก");
+  let category = $state("");
   let editingId = $state(null);
   let search = $state("");
 
@@ -19,21 +21,23 @@
 
   let categories = $derived(menuCategories.length > 0
     ? menuCategories.map(item => item.name)
-    : [...new Set(products.map(product => product.category || "เมนูหลัก"))]
+    : [...new Set(products.map(product => product.category || ""))]
   );
   let menuValue = $derived(products.reduce((sum, product) => sum + Number(product.price), 0));
+
+  let categoryFallback = $derived(t("foods.table_category_fallback"));
 
   function resetForm() {
     name = "";
     price = "";
-    category = "เมนูหลัก";
+    category = "";
     editingId = null;
   }
 
   function editProduct(product) {
     name = product.name;
     price = String(product.price);
-    category = product.category || "เมนูหลัก";
+    category = product.category || "";
     editingId = product.id;
   }
 
@@ -41,11 +45,11 @@
     const payload = {
       name: name.trim(),
       price: Number(price),
-      category: category.trim() || "เมนูหลัก"
+      category: category.trim() || categoryFallback
     };
 
     if (!payload.name || Number.isNaN(payload.price) || payload.price < 0) {
-      alert("กรุณากรอกชื่อเมนูและราคาให้ถูกต้อง");
+      alert(t("foods.alert_invalid_form"));
       return;
     }
 
@@ -59,7 +63,7 @@
   }
 
   async function confirmArchive(product) {
-    if (confirm(`ปิดใช้งานเมนู ${product.name} หรือไม่?`)) {
+    if (confirm(t("foods.alert_confirm_disable", { name: product.name }))) {
       await archiveProduct(product.id);
     }
   }
@@ -68,37 +72,37 @@
 <section class="food-board panel">
   <div class="section-head">
     <div>
-      <p class="eyebrow">Admin Menu Studio</p>
-      <h2 class="section-title">จัดการเมนูอาหาร</h2>
-      <p class="section-subtitle">เพิ่ม แก้ไขราคา จัดหมวดหมู่ และปิดใช้งานเมนูที่ไม่ขายแล้ว</p>
+      <p class="eyebrow">{t("foods.eyebrow")}</p>
+      <h2 class="section-title">{t("foods.title")}</h2>
+      <p class="section-subtitle">{t("foods.subtitle")}</p>
     </div>
     <div class="menu-stats">
-      <div><strong>{products.length}</strong><span>เมนูใช้งาน</span></div>
-      <div><strong>{categories.length}</strong><span>หมวดหมู่</span></div>
-      <div><strong>{menuValue.toLocaleString()}</strong><span>มูลค่ารวม</span></div>
+      <div><strong>{products.length}</strong><span>{t("foods.stat_active")}</span></div>
+      <div><strong>{categories.length}</strong><span>{t("foods.stat_categories")}</span></div>
+      <div><strong>{menuValue.toLocaleString()}</strong><span>{t("foods.stat_total")}</span></div>
     </div>
   </div>
 
   <div class="food-layout">
     <form class="editor-card" onsubmit={(event) => { event.preventDefault(); saveProduct(); }}>
       <div>
-        <p class="eyebrow">{editingId ? "Edit Item" : "New Item"}</p>
-        <h3>{editingId ? "แก้ไขเมนู" : "เพิ่มเมนูใหม่"}</h3>
+        <p class="eyebrow">{editingId ? t("foods.form_eyebrow_edit") : t("foods.form_eyebrow_new")}</p>
+        <h3>{editingId ? t("foods.form_title_edit") : t("foods.form_title_new")}</h3>
       </div>
 
       <label>
-        ชื่อเมนู
-        <input type="text" placeholder="เช่น ข้าวมันไก่พิเศษ" bind:value={name} />
+        {t("foods.form_name_label")}
+        <input type="text" placeholder={t("foods.form_name_placeholder")} bind:value={name} />
       </label>
 
       <label>
-        ราคา
-        <input type="number" min="0" step="1" placeholder="65" bind:value={price} />
+        {t("foods.form_price_label")}
+        <input type="number" min="0" step="1" placeholder={t("foods.form_price_placeholder")} bind:value={price} />
       </label>
 
       <label>
-        หมวดหมู่
-        <input type="text" placeholder="อาหารจานเดียว" bind:value={category} list="category-options" />
+        {t("foods.form_category_label")}
+        <input type="text" placeholder={t("foods.form_category_placeholder")} bind:value={category} list="category-options" />
       </label>
 
       <datalist id="category-options">
@@ -108,9 +112,9 @@
       </datalist>
 
       <div class="form-actions">
-        <button class="primary-action" type="submit">{editingId ? "บันทึกการแก้ไข" : "เพิ่มเมนู"}</button>
+        <button class="primary-action" type="submit">{editingId ? t("foods.form_save_edit") : t("foods.form_add")}</button>
         {#if editingId}
-          <button class="ghost-action" type="button" onclick={resetForm}>ยกเลิก</button>
+          <button class="ghost-action" type="button" onclick={resetForm}>{t("foods.form_cancel")}</button>
         {/if}
       </div>
     </form>
@@ -118,14 +122,14 @@
     <div class="menu-table-card">
       <div class="table-toolbar">
         <div>
-          <p class="eyebrow">Menu Inventory</p>
-          <h3>รายการเมนูทั้งหมด</h3>
+          <p class="eyebrow">{t("foods.table_eyebrow")}</p>
+          <h3>{t("foods.table_title")}</h3>
         </div>
-        <input class="search" type="search" placeholder="ค้นหาเมนูหรือหมวดหมู่" bind:value={search} />
+        <input class="search" type="search" placeholder={t("foods.table_search_placeholder")} bind:value={search} />
       </div>
 
       {#if filteredProducts.length === 0}
-        <div class="empty-state">ไม่พบเมนูที่ตรงกับคำค้นหา</div>
+        <div class="empty-state">{t("foods.table_empty")}</div>
       {:else}
         <div class="menu-list">
           {#each filteredProducts as product (product.id)}
@@ -133,12 +137,12 @@
               <div class="food-token">{product.name?.slice(0, 1)}</div>
               <div class="menu-main">
                 <strong>{product.name}</strong>
-                <span>{product.category || "เมนูหลัก"}</span>
+                <span>{product.category || t("foods.table_category_fallback")}</span>
               </div>
               <div class="price-pill">{Number(product.price).toLocaleString()}฿</div>
               <div class="row-actions">
-                <button class="secondary-action" onclick={() => editProduct(product)}>แก้ไข</button>
-                <button class="danger-action" onclick={() => confirmArchive(product)}>ปิดใช้งาน</button>
+                <button class="secondary-action" onclick={() => editProduct(product)}>{t("foods.table_edit")}</button>
+                <button class="danger-action" onclick={() => confirmArchive(product)}>{t("foods.table_disable")}</button>
               </div>
             </article>
           {/each}

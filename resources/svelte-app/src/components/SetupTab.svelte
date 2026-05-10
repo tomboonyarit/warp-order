@@ -1,4 +1,6 @@
 <script>
+  import { t } from "../lib/i18n.svelte.js";
+
   let {
     setupData,
     createMenuCategory,
@@ -45,7 +47,7 @@
     const payload = { name: categoryName.trim(), sort_order: Number(categoryOrder) || 0 };
 
     if (!payload.name) {
-      alert("กรุณากรอกชื่อหมวดหมู่");
+      alert(t("setup.alert_empty_category"));
       return;
     }
 
@@ -76,7 +78,7 @@
     const payload = { name: groupName.trim(), prompt: groupPrompt.trim(), sort_order: Number(groupOrder) || 0 };
 
     if (!payload.name) {
-      alert("กรุณากรอกชื่อประเภทจุดสังเกต");
+      alert(t("setup.alert_empty_group"));
       return;
     }
 
@@ -111,7 +113,7 @@
     };
 
     if (!payload.group_id || !payload.label) {
-      alert("กรุณาเลือกประเภทและกรอก option");
+      alert(t("setup.alert_empty_option"));
       return;
     }
 
@@ -128,44 +130,44 @@
 <section class="setup-board panel">
   <div class="section-head">
     <div>
-      <p class="eyebrow">Admin Setup</p>
-      <h2 class="section-title">ตั้งค่าข้อมูลพื้นฐาน</h2>
-      <p class="section-subtitle">กำหนดหมวดหมู่เมนู และชุดข้อมูลจุดสังเกตที่พนักงานเลือกได้รวดเร็ว</p>
+      <p class="eyebrow">{t("setup.eyebrow")}</p>
+      <h2 class="section-title">{t("setup.title")}</h2>
+      <p class="section-subtitle">{t("setup.subtitle")}</p>
     </div>
     <div class="setup-stats">
-      <div><strong>{menuCategories.length}</strong><span>หมวดหมู่</span></div>
-      <div><strong>{noteGroups.length}</strong><span>ประเภทจุดสังเกต</span></div>
+      <div><strong>{menuCategories.length}</strong><span>{t("setup.stat_categories")}</span></div>
+      <div><strong>{noteGroups.length}</strong><span>{t("setup.stat_note_types")}</span></div>
     </div>
   </div>
 
   <div class="setup-grid">
     <form class="setup-card" onsubmit={(event) => { event.preventDefault(); saveCategory(); }}>
       <div>
-        <p class="eyebrow">Menu Categories</p>
-        <h3>{editingCategoryId ? "แก้ไขหมวดหมู่" : "เพิ่มหมวดหมู่"}</h3>
+        <p class="eyebrow">{t("setup.cat_eyebrow")}</p>
+        <h3>{editingCategoryId ? t("setup.cat_title_edit") : t("setup.cat_title_add")}</h3>
       </div>
       <label>
-        ชื่อหมวดหมู่
-        <input type="text" placeholder="เช่น อาหารจานเดียว" bind:value={categoryName} />
+        {t("setup.cat_name_label")}
+        <input type="text" placeholder={t("setup.cat_name_placeholder")} bind:value={categoryName} />
       </label>
       <label>
-        ลำดับแสดงผล
+        {t("setup.cat_sort_label")}
         <input type="number" min="0" step="1" bind:value={categoryOrder} />
       </label>
       <div class="form-actions">
-        <button class="primary-action" type="submit">บันทึก</button>
+        <button class="primary-action" type="submit">{t("setup.cat_save")}</button>
         {#if editingCategoryId}
-          <button class="ghost-action" type="button" onclick={resetCategoryForm}>ยกเลิก</button>
+          <button class="ghost-action" type="button" onclick={resetCategoryForm}>{t("setup.cat_cancel")}</button>
         {/if}
       </div>
 
       <div class="list-stack">
         {#each menuCategories as category (category.id)}
           <article class="setup-row">
-            <div><strong>{category.name}</strong><span>ลำดับ {category.sort_order}</span></div>
+            <div><strong>{category.name}</strong><span>{t("setup.cat_order", { n: category.sort_order })}</span></div>
             <div class="row-actions">
-              <button class="secondary-action" type="button" onclick={() => editCategory(category)}>แก้ไข</button>
-              <button class="danger-action" type="button" onclick={() => archiveMenuCategory(category.id)}>ปิด</button>
+              <button class="secondary-action" type="button" onclick={() => editCategory(category)}>{t("setup.cat_edit")}</button>
+              <button class="danger-action" type="button" onclick={() => archiveMenuCategory(category.id)}>{t("setup.cat_close")}</button>
             </div>
           </article>
         {/each}
@@ -174,55 +176,55 @@
 
     <form class="setup-card" onsubmit={(event) => { event.preventDefault(); saveGroup(); }}>
       <div>
-        <p class="eyebrow">Note Types</p>
-        <h3>{editingGroupId ? "แก้ไขประเภท" : "เพิ่มประเภทจุดสังเกต"}</h3>
+        <p class="eyebrow">{t("setup.group_eyebrow")}</p>
+        <h3>{editingGroupId ? t("setup.group_title_edit") : t("setup.group_title_add")}</h3>
       </div>
       <label>
-        ประเภท
-        <input type="text" placeholder="เช่น เสื้อ" bind:value={groupName} />
+        {t("setup.group_name_label")}
+        <input type="text" placeholder={t("setup.group_name_placeholder")} bind:value={groupName} />
       </label>
       <label>
-        คำถาม/คำแนะนำ
-        <input type="text" placeholder="เช่น เลือกสีเสื้อ" bind:value={groupPrompt} />
+        {t("setup.group_prompt_label")}
+        <input type="text" placeholder={t("setup.group_prompt_placeholder")} bind:value={groupPrompt} />
       </label>
       <label>
-        ลำดับแสดงผล
+        {t("setup.group_sort_label")}
         <input type="number" min="0" step="1" bind:value={groupOrder} />
       </label>
       <div class="form-actions">
-        <button class="primary-action" type="submit">บันทึก</button>
+        <button class="primary-action" type="submit">{t("setup.group_save")}</button>
         {#if editingGroupId}
-          <button class="ghost-action" type="button" onclick={resetGroupForm}>ยกเลิก</button>
+          <button class="ghost-action" type="button" onclick={resetGroupForm}>{t("setup.group_cancel")}</button>
         {/if}
       </div>
     </form>
 
     <form class="setup-card" onsubmit={(event) => { event.preventDefault(); saveOption(); }}>
       <div>
-        <p class="eyebrow">Options</p>
-        <h3>{editingOptionId ? "แก้ไข option" : "เพิ่ม option"}</h3>
+        <p class="eyebrow">{t("setup.opt_eyebrow")}</p>
+        <h3>{editingOptionId ? t("setup.opt_title_edit") : t("setup.opt_title_add")}</h3>
       </div>
       <label>
-        ประเภทจุดสังเกต
+        {t("setup.opt_group_label")}
         <select bind:value={optionGroupId}>
-          <option value="">เลือกประเภท</option>
+          <option value="">{t("setup.opt_group_default")}</option>
           {#each noteGroups as group (group.id)}
             <option value={group.id}>{group.name}</option>
           {/each}
         </select>
       </label>
       <label>
-        ตัวเลือก
-        <input type="text" placeholder="เช่น แดง / ดำ / โต๊ะ 1" bind:value={optionLabel} />
+        {t("setup.opt_option_label")}
+        <input type="text" placeholder={t("setup.opt_option_placeholder")} bind:value={optionLabel} />
       </label>
       <label>
-        ลำดับแสดงผล
+        {t("setup.opt_sort_label")}
         <input type="number" min="0" step="1" bind:value={optionOrder} />
       </label>
       <div class="form-actions">
-        <button class="primary-action" type="submit">บันทึก</button>
+        <button class="primary-action" type="submit">{t("setup.opt_save")}</button>
         {#if editingOptionId}
-          <button class="ghost-action" type="button" onclick={resetOptionForm}>ยกเลิก</button>
+          <button class="ghost-action" type="button" onclick={resetOptionForm}>{t("setup.opt_cancel")}</button>
         {/if}
       </div>
     </form>
@@ -234,16 +236,16 @@
         <div class="group-head">
           <div><strong>{group.name}</strong><span>{group.prompt}</span></div>
           <div class="row-actions">
-            <button class="secondary-action" type="button" onclick={() => editGroup(group)}>แก้ไข</button>
-            <button class="danger-action" type="button" onclick={() => archiveNoteGroup(group.id)}>ปิด</button>
+            <button class="secondary-action" type="button" onclick={() => editGroup(group)}>{t("setup.group_edit")}</button>
+            <button class="danger-action" type="button" onclick={() => archiveNoteGroup(group.id)}>{t("setup.group_close")}</button>
           </div>
         </div>
         <div class="option-list">
           {#each group.options as option (option.id)}
             <span>
               {option.label}
-              <button type="button" onclick={() => editOption(group, option)}>แก้ไข</button>
-              <button type="button" onclick={() => archiveNoteOption(option.id)}>ปิด</button>
+              <button type="button" onclick={() => editOption(group, option)}>{t("setup.opt_edit")}</button>
+              <button type="button" onclick={() => archiveNoteOption(option.id)}>{t("setup.opt_close")}</button>
             </span>
           {/each}
         </div>
