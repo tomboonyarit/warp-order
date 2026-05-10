@@ -8,12 +8,12 @@ class CreateOrdersTable
     {
         $sql = "
             CREATE TABLE IF NOT EXISTS orders (
-                id SERIAL PRIMARY KEY,
-                queue_number INTEGER NOT NULL UNIQUE,
-                customer_name VARCHAR(255),
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                queue_number INTEGER NOT NULL,
+                customer_name TEXT,
                 distinctive_notes TEXT,
                 remark TEXT,
-                status VARCHAR(50) NOT NULL DEFAULT 'pending',
+                status TEXT NOT NULL DEFAULT 'pending',
                 user_id INTEGER,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
