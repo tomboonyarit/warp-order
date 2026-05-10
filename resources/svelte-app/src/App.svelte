@@ -2,29 +2,42 @@
   import { onMount } from "svelte";
   import OrderTab from "./components/OrderTab.svelte";
   import KitchenTab from "./components/KitchenTab.svelte";
+  import FoodManagementTab from "./components/FoodManagementTab.svelte";
+  import SetupTab from "./components/SetupTab.svelte";
   import UserTab from "./components/UserTab.svelte";
   import ReportTab from "./components/ReportTab.svelte";
+  import { t, setLocale, i18n, locales } from "./lib/i18n.svelte.js";
 
   let activeTab = $state("order");
   let products = $state([]);
   let orders = $state([]);
   let orderItems = $state([]);
+  let setupData = $state({ menu_categories: [], note_groups: [] });
+
+  const tabs = [
+    { id: "order", labelKey: "tab.order_label", shortKey: "tab.order_short", icon: "POS", titleKey: "tab.order_title" },
+    { id: "kitchen", labelKey: "tab.kitchen_label", shortKey: "tab.kitchen_short", icon: "KDS", titleKey: "tab.kitchen_title" },
+    { id: "foods", labelKey: "tab.foods_label", shortKey: "tab.foods_short", icon: "FOOD", titleKey: "tab.foods_title" },
+    { id: "setup", labelKey: "tab.setup_label", shortKey: "tab.setup_short", icon: "SET", titleKey: "tab.setup_title" },
+    { id: "users", labelKey: "tab.users_label", shortKey: "tab.users_short", icon: "TEAM", titleKey: "tab.users_title" },
+    { id: "reports", labelKey: "tab.reports_label", shortKey: "tab.reports_short", icon: "SALE", titleKey: "tab.reports_title" }
+  ];
 
   let pendingCount = $derived(orders.filter(order => order.status === "pending").length);
   let cookingCount = $derived(orders.filter(order => order.status === "cooking").length);
   let completedCount = $derived(orders.filter(order => order.status === "completed").length);
-
-  const tabs = [
-    { id: "order", label: "ขายหน้าร้าน", short: "ขาย", icon: "POS" },
-    { id: "kitchen", label: "ครัว", short: "ครัว", icon: "KDS" },
-    { id: "users", label: "ผู้ใช้", short: "ผู้ใช้", icon: "TEAM" },
-    { id: "reports", label: "รายงาน", short: "รายงาน", icon: "SALE" }
-  ];
+  let activeTitle = $derived(t(tabs.find(tab => tab.id === activeTab)?.titleKey ?? "tab.order_title"));
 
   onMount(async () => {
+    await loadSetup();
     await loadProducts();
     await loadOrders();
   });
+
+  async function loadSetup() {
+    const res = await fetch("/api/setup");
+    setupData = await res.json();
+  }
 
   async function loadProducts() {
     const res = await fetch("/api/products");
@@ -82,7 +95,7 @@
 
     orderItems = [];
     await loadOrders();
-    alert("Order ถูกส่งเรียบร้อย");
+    alert(t("app.alert_order_submitted"));
   }
 
   async function updateOrderStatus(orderId, status) {
@@ -93,53 +106,173 @@
     });
     await loadOrders();
   }
+
+  async function createProduct(product) {
+    await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product)
+    });
+    await loadProducts();
+  }
+
+  async function updateProduct(productId, product) {
+    await fetch(`/api/products/${productId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product)
+    });
+    await loadProducts();
+  }
+
+  async function archiveProduct(productId) {
+    await fetch(`/api/products/${productId}`, {
+      method: "DELETE"
+    });
+    await loadProducts();
+  }
+
+  async function createMenuCategory(category) {
+    await fetch("/api/setup/menu-categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category)
+    });
+    await loadSetup();
+  }
+
+  async function updateMenuCategory(categoryId, category) {
+    await fetch(`/api/setup/menu-categories/${categoryId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category)
+    });
+    await loadSetup();
+  }
+
+  async function archiveMenuCategory(categoryId) {
+    await fetch(`/api/setup/menu-categories/${categoryId}`, { method: "DELETE" });
+    await loadSetup();
+  }
+
+  async function createNoteGroup(group) {
+    await fetch("/api/setup/note-groups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(group)
+    });
+    await loadSetup();
+  }
+
+  async function updateNoteGroup(groupId, group) {
+    await fetch(`/api/setup/note-groups/${groupId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(group)
+    });
+    await loadSetup();
+  }
+
+  async function archiveNoteGroup(groupId) {
+    await fetch(`/api/setup/note-groups/${groupId}`, { method: "DELETE" });
+    await loadSetup();
+  }
+
+  async function createNoteOption(option) {
+    await fetch("/api/setup/note-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(option)
+    });
+    await loadSetup();
+  }
+
+  async function updateNoteOption(optionId, option) {
+    await fetch(`/api/setup/note-options/${optionId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(option)
+    });
+    await loadSetup();
+  }
+
+  async function archiveNoteOption(optionId) {
+    await fetch(`/api/setup/note-options/${optionId}`, { method: "DELETE" });
+    await loadSetup();
+  }
 </script>
 
 <div class="app-shell">
-  <aside class="sidebar panel" aria-label="เมนูหลัก">
+  <aside class="sidebar panel" aria-label={t("app.sidebar_aria")}>
     <div class="brand-lockup">
       <div class="brand-mark">W</div>
       <div>
         <p class="eyebrow">Warp Order</p>
-        <h1>Counter OS</h1>
+        <h1>{t("app.brand_subtitle")}</h1>
       </div>
+    </div>
+
+    <div class="lang-switcher">
+      {#each locales as l (l.code)}
+        <button
+          class:active={i18n.locale === l.code}
+          onclick={() => setLocale(l.code)}
+          title={l.name}
+        >{l.code.toUpperCase()}</button>
+      {/each}
     </div>
 
     <nav class="main-nav">
       {#each tabs as tab (tab.id)}
         <button class:active={activeTab === tab.id} onclick={() => activeTab = tab.id}>
           <span>{tab.icon}</span>
-          {tab.label}
+          {t(tab.labelKey)}
         </button>
       {/each}
     </nav>
 
     <div class="queue-snapshot">
-      <p class="eyebrow">Live Queue</p>
-      <div><strong>{pendingCount}</strong><span>รอรับออเดอร์</span></div>
-      <div><strong>{cookingCount}</strong><span>กำลังทำ</span></div>
-      <div><strong>{completedCount}</strong><span>เสร็จแล้ว</span></div>
+      <p class="eyebrow">{t("app.queue_title")}</p>
+      <div><strong>{pendingCount}</strong><span>{t("app.queue_pending")}</span></div>
+      <div><strong>{cookingCount}</strong><span>{t("app.queue_cooking")}</span></div>
+      <div><strong>{completedCount}</strong><span>{t("app.queue_completed")}</span></div>
     </div>
   </aside>
 
   <main class="workspace">
     <header class="topbar panel">
       <div>
-        <p class="eyebrow">Today Service</p>
-        <h2>{activeTab === "order" ? "หน้าร้านพร้อมรับออเดอร์" : activeTab === "kitchen" ? "จอครัวและสถานะอาหาร" : activeTab === "users" ? "ทีมและสิทธิ์เข้าใช้งาน" : "ยอดขายและภาพรวม"}</h2>
+        <p class="eyebrow">{t("app.topbar_title")}</p>
+        <h2>{activeTitle}</h2>
       </div>
-      <div class="topbar-stats" aria-label="สรุปสถานะ">
-        <span>{products.length} เมนู</span>
-        <span>{orders.length} ออเดอร์</span>
-        <span>{orderItems.length} ในตะกร้า</span>
+      <div class="topbar-stats" aria-label={t("app.topbar_aria")}>
+        <span>{t("app.topbar_products", { n: products.length })}</span>
+        <span>{t("app.topbar_note_groups", { n: setupData.note_groups.length })}</span>
+        <span>{t("app.topbar_orders", { n: orders.length })}</span>
+        <span>{t("app.topbar_cart", { n: orderItems.length })}</span>
       </div>
     </header>
 
     <section class="tab-content">
     {#if activeTab === "order"}
-      <OrderTab {products} {orders} {orderItems} {addToOrder} {updateCartItem} {removeFromOrder} {clearOrder} {submitOrder} {updateOrderStatus} />
+      <OrderTab {products} {orders} {orderItems} noteGroups={setupData.note_groups} {addToOrder} {updateCartItem} {removeFromOrder} {clearOrder} {submitOrder} {updateOrderStatus} />
     {:else if activeTab === "kitchen"}
       <KitchenTab {orders} {updateOrderStatus} />
+    {:else if activeTab === "foods"}
+      <FoodManagementTab {products} menuCategories={setupData.menu_categories} {createProduct} {updateProduct} {archiveProduct} />
+    {:else if activeTab === "setup"}
+      <SetupTab
+        {setupData}
+        {createMenuCategory}
+        {updateMenuCategory}
+        {archiveMenuCategory}
+        {createNoteGroup}
+        {updateNoteGroup}
+        {archiveNoteGroup}
+        {createNoteOption}
+        {updateNoteOption}
+        {archiveNoteOption}
+      />
     {:else if activeTab === "users"}
       <UserTab />
     {:else if activeTab === "reports"}
@@ -148,13 +281,22 @@
     </section>
   </main>
 
-  <nav class="mobile-nav panel" aria-label="เมนูมือถือ">
+  <nav class="mobile-nav panel" aria-label={t("app.mobile_nav_aria")}>
     {#each tabs as tab (tab.id)}
       <button class:active={activeTab === tab.id} onclick={() => activeTab = tab.id}>
         <span>{tab.icon}</span>
-        {tab.short}
+        {t(tab.shortKey)}
       </button>
     {/each}
+    <div class="mobile-lang">
+      {#each locales as l (l.code)}
+        <button
+          class:active={i18n.locale === l.code}
+          onclick={() => setLocale(l.code)}
+          title={l.name}
+        >{l.code.toUpperCase()}</button>
+      {/each}
+    </div>
   </nav>
 </div>
 
@@ -325,7 +467,7 @@
     left: 12px;
     z-index: 10;
     display: none;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 6px;
     padding: 8px;
   }
@@ -337,6 +479,42 @@
     place-items: center;
     border-radius: 18px;
     font-size: 12px;
+  }
+
+  .lang-switcher {
+    display: flex;
+    gap: 6px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
+  }
+
+  .lang-switcher button,
+  .mobile-lang button {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 8px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.52);
+    cursor: pointer;
+    transition: all 160ms ease;
+  }
+
+  .lang-switcher button.active,
+  .mobile-lang button.active {
+    color: #221707;
+    border-color: rgba(242, 159, 5, 0.55);
+    background: #fff1d2;
+  }
+
+  .mobile-lang {
+    display: flex;
+    gap: 4px;
+    grid-column: 1 / -1;
+    margin-top: 4px;
   }
 
   @media (max-width: 980px) {

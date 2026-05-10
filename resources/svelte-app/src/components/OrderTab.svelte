@@ -1,4 +1,6 @@
 <script>
+  import { t } from "../lib/i18n.svelte.js";
+
   let {
     products,
     orders,
@@ -8,30 +10,73 @@
     removeFromOrder,
     clearOrder,
     submitOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    noteGroups = []
   } = $props();
 
   let customerName = $state("");
-  let distinctiveNotes = $state("");
+  let manualNotes = $state("");
+  let selectedNotes = $state({});
   let remark = $state("");
 
   let pendingOrders = $derived(orders.filter(o => o.status === "pending"));
   let cartTotal = $derived(orderItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0));
+  let selectedNoteText = $derived(buildDistinctiveNotes());
 
-  function handleSubmit() {
-    if (orderItems.length === 0) {
-      alert("กรุณาเลือกสินค้าอย่างน้อยหนึ่งรายการ");
+  function toggleNoteGroup(group) {
+    if (selectedNotes[group.id]) {
+      const nextNotes = { ...selectedNotes };
+      delete nextNotes[group.id];
+      selectedNotes = nextNotes;
       return;
     }
 
-    submitOrder(customerName, distinctiveNotes, remark);
+    selectedNotes = {
+      ...selectedNotes,
+      [group.id]: {
+        group: group.name,
+        option: ""
+      }
+    };
+  }
+
+  function selectNoteOption(group, option) {
+    selectedNotes = {
+      ...selectedNotes,
+      [group.id]: {
+        group: group.name,
+        option: option.label
+      }
+    };
+  }
+
+  function buildDistinctiveNotes() {
+    const quickNotes = Object.values(selectedNotes)
+      .map(note => note.option ? `${note.group}: ${note.option}` : note.group)
+      .filter(Boolean);
+
+    if (manualNotes.trim()) {
+      quickNotes.push(manualNotes.trim());
+    }
+
+    return quickNotes.join(", ");
+  }
+
+  function handleSubmit() {
+    if (orderItems.length === 0) {
+      alert(t("order.alert_empty_cart"));
+      return;
+    }
+
+    submitOrder(customerName, selectedNoteText, remark);
     customerName = "";
-    distinctiveNotes = "";
+    manualNotes = "";
+    selectedNotes = {};
     remark = "";
   }
 
   function cancelOrder(orderId) {
-    if (confirm("ต้องการยกเลิกออเดอร์นี้หรือไม่?")) {
+    if (confirm(t("order.alert_confirm_cancel"))) {
       updateOrderStatus(orderId, "cancelled");
     }
   }
@@ -41,11 +86,11 @@
   <section class="menu-panel panel">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Menu Board</p>
-        <h2 class="section-title">เลือกสินค้า</h2>
-        <p class="section-subtitle">แตะเมนูเพื่อเพิ่มเข้าตะกร้า เหมาะกับการขายหน้าร้านแบบเร็ว</p>
+        <p class="eyebrow">{t("order.menu_eyebrow")}</p>
+        <h2 class="section-title">{t("order.menu_title")}</h2>
+        <p class="section-subtitle">{t("order.menu_subtitle")}</p>
       </div>
-      <div class="menu-count">{products.length} เมนู</div>
+      <div class="menu-count">{t("order.menu_count", { n: products.length })}</div>
     </div>
 
     <div class="products-grid">
@@ -54,7 +99,7 @@
           <span class="product-initial">{product.name?.slice(0, 1)}</span>
           <span class="product-name">{product.name}</span>
           <span class="product-meta">
-            <span>{product.category || "เมนูหลัก"}</span>
+            <span>{product.category || t("order.menu_category_fallback")}</span>
             <strong>{Number(product.price).toLocaleString()}฿</strong>
           </span>
         </button>
@@ -65,28 +110,28 @@
   <aside class="cart-panel panel">
     <div class="section-head compact">
       <div>
-        <p class="eyebrow">Current Cart</p>
-        <h2 class="section-title">ตะกร้า</h2>
+        <p class="eyebrow">{t("order.cart_eyebrow")}</p>
+        <h2 class="section-title">{t("order.cart_title")}</h2>
       </div>
-      <button class="ghost-action" onclick={clearOrder} disabled={orderItems.length === 0}>ล้าง</button>
+      <button class="ghost-action" onclick={clearOrder} disabled={orderItems.length === 0}>{t("order.cart_clear")}</button>
     </div>
 
     {#if orderItems.length === 0}
-      <div class="empty-state">ยังไม่มีสินค้าในตะกร้า</div>
+      <div class="empty-state">{t("order.cart_empty")}</div>
     {:else}
       <div class="cart-list">
         {#each orderItems as item (item.product_id)}
           <div class="cart-item">
             <div>
               <strong>{item.name}</strong>
-              <span>{Number(item.price).toLocaleString()}฿ ต่อรายการ</span>
+              <span>{Number(item.price).toLocaleString()}฿ {t("order.cart_unit")}</span>
             </div>
-            <div class="qty-control" aria-label="จำนวนสินค้า">
+            <div class="qty-control" aria-label={t("order.cart_aria_qty")}>
               <button onclick={() => updateCartItem(item.product_id, -1)}>-</button>
               <span>{item.quantity}</span>
               <button onclick={() => updateCartItem(item.product_id, 1)}>+</button>
             </div>
-            <button class="remove-btn" aria-label="ลบสินค้า" onclick={() => removeFromOrder(item.product_id)}>ลบ</button>
+            <button class="remove-btn" aria-label={t("order.cart_aria_remove")} onclick={() => removeFromOrder(item.product_id)}>{t("order.cart_remove")}</button>
           </div>
         {/each}
       </div>
@@ -94,46 +139,76 @@
 
     <div class="customer-form">
       <label>
-        ชื่อลูกค้า
-        <input type="text" placeholder="เช่น คุณต้อม" bind:value={customerName} />
+        {t("order.customer_label")}
+        <input type="text" placeholder={t("order.customer_placeholder")} bind:value={customerName} />
+      </label>
+      <div class="quick-notes">
+        <div class="quick-notes-head">
+          <div>
+            <span>{t("order.notes_title")}</span>
+            <strong>{selectedNoteText || t("order.notes_not_selected")}</strong>
+          </div>
+        </div>
+
+        <div class="note-groups" aria-label={t("order.notes_aria_groups")}>
+          {#each noteGroups as group (group.id)}
+            <button type="button" class:active={Boolean(selectedNotes[group.id])} onclick={() => toggleNoteGroup(group)}>
+              {group.name}
+            </button>
+          {/each}
+        </div>
+
+        {#each noteGroups.filter(group => selectedNotes[group.id]) as group (group.id)}
+          <div class="note-options">
+            <p>{group.prompt || t("order.notes_prompt", { name: group.name })}</p>
+            <div>
+              {#each group.options as option (option.id)}
+                <button type="button" class:active={selectedNotes[group.id]?.option === option.label} onclick={() => selectNoteOption(group, option)}>
+                  {option.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
+
+      <label>
+        {t("order.manual_notes_label")}
+        <input type="text" placeholder={t("order.manual_notes_placeholder")} bind:value={manualNotes} />
       </label>
       <label>
-        จุดสังเกต
-        <input type="text" placeholder="เสื้อแดง โต๊ะ 3 หมวกดำ" bind:value={distinctiveNotes} />
-      </label>
-      <label>
-        หมายเหตุ
-        <textarea placeholder="ไม่เผ็ด แยกน้ำ เพิ่มข้าว" bind:value={remark} rows="3"></textarea>
+        {t("order.remark_label")}
+        <textarea placeholder={t("order.remark_placeholder")} bind:value={remark} rows="3"></textarea>
       </label>
     </div>
 
     <div class="checkout-bar">
       <div>
-        <span>ยอดรวม</span>
+        <span>{t("order.cart_total")}</span>
         <strong>{cartTotal.toLocaleString()}฿</strong>
       </div>
-      <button class="primary-action" onclick={handleSubmit} disabled={orderItems.length === 0}>ส่งออเดอร์</button>
+      <button class="primary-action" onclick={handleSubmit} disabled={orderItems.length === 0}>{t("order.cart_submit")}</button>
     </div>
   </aside>
 
   <section class="queue-panel panel">
     <div class="section-head compact">
       <div>
-        <p class="eyebrow">Queue</p>
-        <h2 class="section-title">คิวรอทำ</h2>
+        <p class="eyebrow">{t("order.queue_eyebrow")}</p>
+        <h2 class="section-title">{t("order.queue_title")}</h2>
       </div>
-      <div class="menu-count">{pendingOrders.length} คิว</div>
+      <div class="menu-count">{t("order.queue_count", { n: pendingOrders.length })}</div>
     </div>
 
     {#if pendingOrders.length === 0}
-      <div class="empty-state">ไม่มีคิวค้างอยู่ พร้อมรับออเดอร์ใหม่</div>
+      <div class="empty-state">{t("order.queue_empty")}</div>
     {:else}
       <div class="queue-list">
         {#each pendingOrders as order (order.id)}
           <article class="queue-card">
             <div class="queue-topline">
               <strong>#{order.queue_number}</strong>
-              <span>รอทำ</span>
+              <span>{t("order.queue_status_waiting")}</span>
             </div>
             {#if order.customer_name}
               <h3>{order.customer_name}</h3>
@@ -147,8 +222,8 @@
               {/each}
             </div>
             <div class="order-actions">
-              <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "completed")}>เสร็จแล้ว</button>
-              <button class="danger-action" onclick={() => cancelOrder(order.id)}>ยกเลิก</button>
+              <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "completed")}>{t("order.queue_complete")}</button>
+              <button class="danger-action" onclick={() => cancelOrder(order.id)}>{t("order.queue_cancel")}</button>
             </div>
           </article>
         {/each}
@@ -161,8 +236,15 @@
   .order-workspace {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 390px;
+    grid-template-areas:
+      "menu cart"
+      "queue cart";
     gap: 18px;
     align-items: start;
+  }
+
+  .menu-panel {
+    grid-area: menu;
   }
 
   .menu-panel,
@@ -172,12 +254,13 @@
   }
 
   .cart-panel {
+    grid-area: cart;
     position: sticky;
     top: 22px;
   }
 
   .queue-panel {
-    grid-column: 1 / -1;
+    grid-area: queue;
   }
 
   .section-head {
@@ -334,6 +417,72 @@
     margin-top: 16px;
   }
 
+  .quick-notes {
+    display: grid;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.56);
+  }
+
+  .quick-notes-head span,
+  .quick-notes-head strong {
+    display: block;
+  }
+
+  .quick-notes-head span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .quick-notes-head strong {
+    margin-top: 4px;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .note-groups,
+  .note-options div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .note-groups button,
+  .note-options button {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 11px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .note-groups button.active,
+  .note-options button.active {
+    color: #221707;
+    border-color: rgba(242, 159, 5, 0.55);
+    background: #fff1d2;
+  }
+
+  .note-options {
+    display: grid;
+    gap: 7px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+
+  .note-options p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+  }
+
   label {
     display: grid;
     gap: 6px;
@@ -455,6 +604,10 @@
   @media (max-width: 1180px) {
     .order-workspace {
       grid-template-columns: 1fr;
+      grid-template-areas:
+        "menu"
+        "cart"
+        "queue";
     }
 
     .cart-panel {

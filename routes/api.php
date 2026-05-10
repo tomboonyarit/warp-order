@@ -45,9 +45,80 @@ if (strpos($path, $api) === 0) {
                 echo $controller->store($input);
             }
             break;
+
+        case '/setup':
+            require_once __DIR__ . '/../src/Controllers/SetupController.php';
+            $controller = new \TomOrder\Pos\Controllers\SetupController();
+            if ($method === 'GET') {
+                echo $controller->index();
+            }
+            break;
+
+        case '/setup/menu-categories':
+            require_once __DIR__ . '/../src/Controllers/SetupController.php';
+            $controller = new \TomOrder\Pos\Controllers\SetupController();
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                echo $controller->storeMenuCategory($input);
+            }
+            break;
+
+        case '/setup/note-groups':
+            require_once __DIR__ . '/../src/Controllers/SetupController.php';
+            $controller = new \TomOrder\Pos\Controllers\SetupController();
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                echo $controller->storeNoteGroup($input);
+            }
+            break;
+
+        case '/setup/note-options':
+            require_once __DIR__ . '/../src/Controllers/SetupController.php';
+            $controller = new \TomOrder\Pos\Controllers\SetupController();
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true);
+                echo $controller->storeNoteOption($input);
+            }
+            break;
             
         default:
-            if (preg_match('#^/orders/status/(\d+)$#', $route, $matches)) {
+            if (preg_match('#^/setup/menu-categories/(\d+)$#', $route, $matches)) {
+                require_once __DIR__ . '/../src/Controllers/SetupController.php';
+                $controller = new \TomOrder\Pos\Controllers\SetupController();
+                if ($method === 'PUT') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+                    echo $controller->updateMenuCategory((int) $matches[1], $input);
+                } elseif ($method === 'DELETE') {
+                    echo $controller->archiveMenuCategory((int) $matches[1]);
+                }
+            } elseif (preg_match('#^/setup/note-groups/(\d+)$#', $route, $matches)) {
+                require_once __DIR__ . '/../src/Controllers/SetupController.php';
+                $controller = new \TomOrder\Pos\Controllers\SetupController();
+                if ($method === 'PUT') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+                    echo $controller->updateNoteGroup((int) $matches[1], $input);
+                } elseif ($method === 'DELETE') {
+                    echo $controller->archiveNoteGroup((int) $matches[1]);
+                }
+            } elseif (preg_match('#^/setup/note-options/(\d+)$#', $route, $matches)) {
+                require_once __DIR__ . '/../src/Controllers/SetupController.php';
+                $controller = new \TomOrder\Pos\Controllers\SetupController();
+                if ($method === 'PUT') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+                    echo $controller->updateNoteOption((int) $matches[1], $input);
+                } elseif ($method === 'DELETE') {
+                    echo $controller->archiveNoteOption((int) $matches[1]);
+                }
+            } elseif (preg_match('#^/products/(\d+)$#', $route, $matches)) {
+                require_once __DIR__ . '/../src/Controllers/ProductController.php';
+                $controller = new \TomOrder\Pos\Controllers\ProductController();
+                if ($method === 'PUT') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+                    echo $controller->update((int) $matches[1], $input);
+                } elseif ($method === 'DELETE') {
+                    echo $controller->archive((int) $matches[1]);
+                }
+            } elseif (preg_match('#^/orders/status/(\d+)$#', $route, $matches)) {
                 require_once __DIR__ . '/../src/Controllers/OrderController.php';
                 $controller = new \TomOrder\Pos\Controllers\OrderController();
                 if ($method === 'PUT') {

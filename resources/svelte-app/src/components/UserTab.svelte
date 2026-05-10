@@ -1,58 +1,68 @@
 <script>
+  import { t } from "../lib/i18n.svelte.js";
+
   let users = $state([
-    { username: "admin", role: "admin", status: "พร้อมใช้งาน" }
+    { username: "admin", role: "admin", status: "" }
   ]);
   let username = $state("");
   let password = $state("");
   let role = $state("staff");
 
+  let statusActive = $derived(t("user.status_active"));
+
+  $effect(() => {
+    if (users.length > 0 && !users[0].status) {
+      users = users.map(u => ({ ...u, status: statusActive }));
+    }
+  });
+
   async function addUser() {
-    alert("ฟีเจอร์เพิ่มผู้ใช้ยังไม่ได้ต่อ API");
+    alert(t("user.alert_not_connected"));
   }
 </script>
 
 <section class="user-board panel">
   <div class="section-head">
     <div>
-      <p class="eyebrow">Access Control</p>
-      <h2 class="section-title">จัดการผู้ใช้</h2>
-      <p class="section-subtitle">เตรียมพื้นที่สำหรับเพิ่มพนักงานหน้าร้าน ครัว และผู้ดูแลระบบ</p>
+      <p class="eyebrow">{t("user.eyebrow")}</p>
+      <h2 class="section-title">{t("user.title")}</h2>
+      <p class="section-subtitle">{t("user.subtitle")}</p>
     </div>
   </div>
 
   <div class="user-layout">
     <form class="user-form" onsubmit={(event) => { event.preventDefault(); addUser(); }}>
-      <h3>เพิ่มผู้ใช้ใหม่</h3>
+      <h3>{t("user.form_title")}</h3>
       <label>
-        ชื่อผู้ใช้
-        <input type="text" placeholder="staff01" bind:value={username} />
+        {t("user.form_username_label")}
+        <input type="text" placeholder={t("user.form_username_placeholder")} bind:value={username} />
       </label>
       <label>
-        รหัสผ่าน
-        <input type="password" placeholder="อย่างน้อย 8 ตัวอักษร" bind:value={password} />
+        {t("user.form_password_label")}
+        <input type="password" placeholder={t("user.form_password_placeholder")} bind:value={password} />
       </label>
       <label>
-        สิทธิ์การใช้งาน
+        {t("user.form_role_label")}
         <select bind:value={role}>
-          <option value="staff">พนักงานหน้าร้าน</option>
-          <option value="admin">ผู้ดูแลระบบ</option>
-          <option value="kitchen">ครัว</option>
+          <option value="staff">{t("user.form_role_staff")}</option>
+          <option value="admin">{t("user.form_role_admin")}</option>
+          <option value="kitchen">{t("user.form_role_kitchen")}</option>
         </select>
       </label>
-      <button class="primary-action" type="submit">เพิ่มผู้ใช้</button>
+      <button class="primary-action" type="submit">{t("user.form_submit")}</button>
     </form>
 
     <div class="users-list">
       <div class="list-head">
-        <h3>ทีมปัจจุบัน</h3>
-        <span>{users.length} คน</span>
+        <h3>{t("user.list_title")}</h3>
+        <span>{t("user.list_count", { n: users.length })}</span>
       </div>
       {#each users as user (user.username)}
         <div class="user-item">
           <div class="avatar">{user.username.slice(0, 1).toUpperCase()}</div>
           <div>
             <strong>{user.username}</strong>
-            <span>{user.status}</span>
+            <span>{user.status || statusActive}</span>
           </div>
           <span class="role">{user.role}</span>
         </div>

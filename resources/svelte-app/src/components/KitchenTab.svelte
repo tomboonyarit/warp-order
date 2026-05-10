@@ -1,4 +1,6 @@
 <script>
+  import { t } from "../lib/i18n.svelte.js";
+
   let { orders, updateOrderStatus } = $props();
 
   let kitchenOrders = $derived(orders.filter(o => o.status === "pending" || o.status === "cooking"));
@@ -7,25 +9,25 @@
 <section class="kitchen-board panel">
   <div class="section-head">
     <div>
-      <p class="eyebrow">Kitchen Display</p>
-      <h2 class="section-title">คิวอาหารในครัว</h2>
-      <p class="section-subtitle">แยกคิวรอทำและกำลังทำให้ทีมครัวมองเห็นทันที</p>
+      <p class="eyebrow">{t("kitchen.eyebrow")}</p>
+      <h2 class="section-title">{t("kitchen.title")}</h2>
+      <p class="section-subtitle">{t("kitchen.subtitle")}</p>
     </div>
-    <div class="board-count">{kitchenOrders.length} รายการ</div>
+    <div class="board-count">{t("kitchen.count", { n: kitchenOrders.length })}</div>
   </div>
 
   {#if kitchenOrders.length === 0}
-    <div class="empty-state">ไม่มีคิวอาหารค้างอยู่</div>
+    <div class="empty-state">{t("kitchen.empty")}</div>
   {:else}
     <div class="kitchen-grid">
       {#each kitchenOrders as order (order.id)}
         <article class="ticket {order.status}">
           <div class="ticket-head">
             <div>
-              <span>คิว</span>
+              <span>{t("kitchen.queue_label")}</span>
               <strong>#{order.queue_number}</strong>
             </div>
-            <span class="status {order.status}">{order.status === "pending" ? "รอเริ่ม" : "กำลังทำ"}</span>
+            <span class="status {order.status}">{order.status === "pending" ? t("kitchen.status_pending") : t("kitchen.status_cooking")}</span>
           </div>
 
           {#if order.customer_name}
@@ -46,9 +48,9 @@
           </div>
 
           {#if order.status === "pending"}
-            <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "cooking")}>เริ่มทำ</button>
+            <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "cooking")}>{t("kitchen.start_cooking")}</button>
           {:else}
-            <button class="primary-action" onclick={() => updateOrderStatus(order.id, "completed")}>เสร็จแล้ว</button>
+            <button class="primary-action" onclick={() => updateOrderStatus(order.id, "completed")}>{t("kitchen.complete")}</button>
           {/if}
         </article>
       {/each}
