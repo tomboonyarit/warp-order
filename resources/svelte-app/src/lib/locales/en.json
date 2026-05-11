@@ -17,7 +17,17 @@
     "topbar_orders": "{n} orders",
     "topbar_cart": "{n} in cart",
     "mobile_nav_aria": "Mobile Menu",
-    "alert_order_submitted": "Order submitted successfully"
+    "alert_order_submitted": "Order submitted successfully",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "no_history": "No order history",
+    "order": "Order",
+    "status_completed": "Completed",
+    "customer": "Customer",
+    "items": "Items",
+    "total": "Total",
+    "notes": "Notes",
+    "currency": "THB"
   },
   "tab": {
     "order_label": "Counter Sales",
@@ -35,9 +45,12 @@
     "users_label": "Users",
     "users_short": "Users",
     "users_title": "Team & access permissions",
-    "reports_label": "Reports",
-    "reports_short": "Reports",
-    "reports_title": "Sales & overview"
+   "reports_label": "Reports",
+   "reports_short": "Reports",
+   "reports_title": "Sales & overview",
+   "history_label": "History",
+   "history_short": "History",
+   "history_title": "Order History"
   },
   "order": {
     "menu_eyebrow": "Menu Board",

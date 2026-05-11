@@ -17,7 +17,17 @@
     "topbar_orders": "{n} ออเดอร์",
     "topbar_cart": "{n} ในตะกร้า",
     "mobile_nav_aria": "เมนูมือถือ",
-    "alert_order_submitted": "Order ถูกส่งเรียบร้อย"
+    "alert_order_submitted": "Order ถูกส่งเรียบร้อย",
+    "loading": "กำลังโหลด...",
+    "error": "เกิดข้อผิดพลาด",
+    "no_history": "ไม่มีประวัติคำสั่งซื้อ",
+    "order": "คำสั่งซื้อ",
+    "status_completed": "เสร็จสิ้น",
+    "customer": "ลูกค้า",
+    "items": "รายการ",
+    "total": "รวม",
+    "notes": "หมายเหตุ",
+    "currency": "บาท"
   },
   "tab": {
     "order_label": "ขายหน้าร้าน",
@@ -35,9 +45,12 @@
     "users_label": "ผู้ใช้",
     "users_short": "ผู้ใช้",
     "users_title": "ทีมและสิทธิ์เข้าใช้งาน",
-    "reports_label": "รายงาน",
-    "reports_short": "รายงาน",
-    "reports_title": "ยอดขายและภาพรวม"
+   "reports_label": "รายงาน",
+   "reports_short": "รายงาน",
+   "reports_title": "ยอดขายและภาพรวม",
+   "history_label": "ประวัติ",
+   "history_short": "ประวัติ",
+   "history_title": "ประวัติคำสั่งซื้อ"
   },
   "order": {
     "menu_eyebrow": "Menu Board",

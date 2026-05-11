@@ -1,12 +1,13 @@
 <script>
-  import { onMount } from "svelte";
-  import OrderTab from "./components/OrderTab.svelte";
-  import KitchenTab from "./components/KitchenTab.svelte";
-  import FoodManagementTab from "./components/FoodManagementTab.svelte";
-  import SetupTab from "./components/SetupTab.svelte";
-  import UserTab from "./components/UserTab.svelte";
-  import ReportTab from "./components/ReportTab.svelte";
-  import { t, setLocale, i18n, locales } from "./lib/i18n.svelte.js";
+import { onMount } from "svelte";
+import OrderTab from "./components/OrderTab.svelte";
+import KitchenTab from "./components/KitchenTab.svelte";
+import FoodManagementTab from "./components/FoodManagementTab.svelte";
+import SetupTab from "./components/SetupTab.svelte";
+import UserTab from "./components/UserTab.svelte";
+import ReportTab from "./components/ReportTab.svelte";
+import HistoryTab from "./components/HistoryTab.svelte";
+import { t, setLocale, i18n, locales } from "./lib/i18n.svelte.js";
 
   let activeTab = $state("order");
   let products = $state([]);
@@ -14,14 +15,15 @@
   let orderItems = $state([]);
   let setupData = $state({ menu_categories: [], note_groups: [] });
 
-  const tabs = [
-    { id: "order", labelKey: "tab.order_label", shortKey: "tab.order_short", icon: "POS", titleKey: "tab.order_title" },
-    { id: "kitchen", labelKey: "tab.kitchen_label", shortKey: "tab.kitchen_short", icon: "KDS", titleKey: "tab.kitchen_title" },
-    { id: "foods", labelKey: "tab.foods_label", shortKey: "tab.foods_short", icon: "FOOD", titleKey: "tab.foods_title" },
-    { id: "setup", labelKey: "tab.setup_label", shortKey: "tab.setup_short", icon: "SET", titleKey: "tab.setup_title" },
-    { id: "users", labelKey: "tab.users_label", shortKey: "tab.users_short", icon: "TEAM", titleKey: "tab.users_title" },
-    { id: "reports", labelKey: "tab.reports_label", shortKey: "tab.reports_short", icon: "SALE", titleKey: "tab.reports_title" }
-  ];
+const tabs = [
+  { id: "order", labelKey: "tab.order_label", shortKey: "tab.order_short", icon: "POS", titleKey: "tab.order_title" },
+  { id: "kitchen", labelKey: "tab.kitchen_label", shortKey: "tab.kitchen_short", icon: "KDS", titleKey: "tab.kitchen_title" },
+  { id: "foods", labelKey: "tab.foods_label", shortKey: "tab.foods_short", icon: "FOOD", titleKey: "tab.foods_title" },
+  { id: "setup", labelKey: "tab.setup_label", shortKey: "tab.setup_short", icon: "SET", titleKey: "tab.setup_title" },
+  { id: "users", labelKey: "tab.users_label", shortKey: "tab.users_short", icon: "TEAM", titleKey: "tab.users_title" },
+  { id: "reports", labelKey: "tab.reports_label", shortKey: "tab.reports_short", icon: "SALE", titleKey: "tab.reports_title" },
+  { id: "history", labelKey: "tab.history_label", shortKey: "tab.history_short", icon: "HISTORY", titleKey: "tab.history_title" }
+];
 
   let pendingCount = $derived(orders.filter(order => order.status === "pending").length);
   let cookingCount = $derived(orders.filter(order => order.status === "cooking").length);
@@ -253,32 +255,34 @@
       </div>
     </header>
 
-    <section class="tab-content">
-    {#if activeTab === "order"}
-      <OrderTab {products} {orders} {orderItems} noteGroups={setupData.note_groups} {addToOrder} {updateCartItem} {removeFromOrder} {clearOrder} {submitOrder} {updateOrderStatus} />
-    {:else if activeTab === "kitchen"}
-      <KitchenTab {orders} {updateOrderStatus} />
-    {:else if activeTab === "foods"}
-      <FoodManagementTab {products} menuCategories={setupData.menu_categories} {createProduct} {updateProduct} {archiveProduct} />
-    {:else if activeTab === "setup"}
-      <SetupTab
-        {setupData}
-        {createMenuCategory}
-        {updateMenuCategory}
-        {archiveMenuCategory}
-        {createNoteGroup}
-        {updateNoteGroup}
-        {archiveNoteGroup}
-        {createNoteOption}
-        {updateNoteOption}
-        {archiveNoteOption}
-      />
-    {:else if activeTab === "users"}
-      <UserTab />
-    {:else if activeTab === "reports"}
-      <ReportTab {orders} />
-    {/if}
-    </section>
+     <section class="tab-content">
+     {#if activeTab === "order"}
+       <OrderTab {products} {orders} {orderItems} noteGroups={setupData.note_groups} {addToOrder} {updateCartItem} {removeFromOrder} {clearOrder} {submitOrder} {updateOrderStatus} />
+     {:else if activeTab === "kitchen"}
+       <KitchenTab {orders} {updateOrderStatus} />
+     {:else if activeTab === "foods"}
+       <FoodManagementTab {products} menuCategories={setupData.menu_categories} {createProduct} {updateProduct} {archiveProduct} />
+     {:else if activeTab === "setup"}
+       <SetupTab
+         {setupData}
+         {createMenuCategory}
+         {updateMenuCategory}
+         {archiveMenuCategory}
+         {createNoteGroup}
+         {updateNoteGroup}
+         {archiveNoteGroup}
+         {createNoteOption}
+         {updateNoteOption}
+         {archiveNoteOption}
+       />
+     {:else if activeTab === "users"}
+       <UserTab />
+     {:else if activeTab === "reports"}
+       <ReportTab {orders} />
+     {:else if activeTab === "history"}
+       <HistoryTab />
+     {/if}
+   </section>
   </main>
 
   <nav class="mobile-nav panel" aria-label={t("app.mobile_nav_aria")}>
