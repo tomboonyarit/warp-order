@@ -3,7 +3,7 @@
         'name' => 'tom-order/pos',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1f979b9d0ce4ac08f133d8c8a626b6c07fdde57a',
+        'reference' => '93c6f1da628847ee861f923472422e367f755742',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -58,7 +58,7 @@
         'tom-order/pos' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1f979b9d0ce4ac08f133d8c8a626b6c07fdde57a',
+            'reference' => '93c6f1da628847ee861f923472422e367f755742',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
