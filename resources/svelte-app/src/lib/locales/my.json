@@ -70,6 +70,7 @@
     "queue_count": "{n} တန်း",
     "queue_empty": "စောင့်ဆိုင်းရန်တန်းမရှိပါ။ အော်ဒါအသစ်လက်ခံရန်အဆင်သင့်",
     "queue_status_waiting": "စောင့်ဆိုင်း",
+    "queue_date_label": "ရက်စွေ",
     "queue_complete": "ပြီးဆုံး",
     "queue_cancel": "ဖျက်သိမ်း",
     "alert_empty_cart": "ကျေးဇူးပြု၍ အနည်းဆုံးပစ္စည်းတစ်ခုရွေးချယ်ပါ",

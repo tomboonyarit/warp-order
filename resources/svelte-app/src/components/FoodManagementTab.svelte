@@ -282,9 +282,9 @@
     height: 46px;
     place-items: center;
     border-radius: 16px;
-    color: var(--brand-dark);
+    color: var(--brand);
     font-weight: 950;
-    background: #fff1d2;
+    background: var(--orange-soft);
   }
 
   .menu-main strong,
@@ -306,9 +306,9 @@
   .price-pill {
     border-radius: 999px;
     padding: 9px 12px;
-    color: #221707;
+    color: white;
     font-weight: 950;
-    background: linear-gradient(135deg, #ffdf98, var(--brand));
+    background: linear-gradient(135deg, #ff8a8a, var(--brand));
   }
 
   .row-actions {

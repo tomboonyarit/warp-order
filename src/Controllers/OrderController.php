@@ -51,7 +51,7 @@ class OrderController
             $stmt = $db->query("SELECT COALESCE(MAX(queue_number), 0) + 1 FROM orders");
             $queueNumber = $stmt->fetchColumn();
             
-            $stmt = $db->prepare("INSERT INTO orders (queue_number, customer_name, distinctive_notes, remark, status) VALUES (?, ?, ?, ?, 'pending')");
+            $stmt = $db->prepare("INSERT INTO orders (queue_number, customer_name, distinctive_notes, remark, status, created_at) VALUES (?, ?, ?, ?, 'pending', datetime('now', '+7 hours'))");
             $stmt->execute([
                 $queueNumber,
                 $data['customer_name'] ?? '',

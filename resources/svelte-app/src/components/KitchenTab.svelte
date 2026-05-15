@@ -131,8 +131,8 @@
   }
 
   .status.pending {
-    color: var(--brand-dark);
-    background: #fff1d2;
+    color: var(--brand);
+    background: var(--orange-soft);
   }
 
   .status.cooking {

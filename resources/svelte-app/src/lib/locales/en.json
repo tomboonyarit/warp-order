@@ -70,6 +70,7 @@
     "queue_count": "{n} queue",
     "queue_empty": "No pending queues, ready for new orders",
     "queue_status_waiting": "Waiting",
+    "queue_date_label": "Date",
     "queue_complete": "Completed",
     "queue_cancel": "Cancel",
     "alert_empty_cart": "Please select at least one item",

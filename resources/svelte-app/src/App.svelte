@@ -333,10 +333,10 @@
     height: 54px;
     place-items: center;
     border-radius: 18px;
-    color: #221707;
+    color: white;
     font-weight: 950;
-    background: linear-gradient(135deg, #ffe1a3, var(--brand));
-    box-shadow: 0 16px 34px rgba(242, 159, 5, 0.28);
+    background: linear-gradient(135deg, #ff8a8a, var(--brand));
+    box-shadow: 0 16px 34px rgba(255, 107, 107, 0.28);
   }
 
   h1,
@@ -383,7 +383,7 @@
 
   .main-nav span,
   .mobile-nav span {
-    color: var(--brand-dark);
+    color: var(--brand);
     font-size: 10px;
     letter-spacing: 0.12em;
   }
@@ -391,7 +391,7 @@
   .main-nav button.active,
   .mobile-nav button.active {
     color: var(--ink);
-    background: #fff3d8;
+    background: var(--orange-soft);
   }
 
   .main-nav button:hover {
@@ -505,9 +505,9 @@
 
   .lang-switcher button.active,
   .mobile-lang button.active {
-    color: #221707;
-    border-color: rgba(242, 159, 5, 0.55);
-    background: #fff1d2;
+    color: var(--brand);
+    border-color: rgba(255, 107, 107, 0.5);
+    background: var(--orange-soft);
   }
 
   .mobile-lang {

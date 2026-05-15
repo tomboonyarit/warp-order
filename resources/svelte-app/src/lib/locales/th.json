@@ -70,6 +70,7 @@
     "queue_count": "{n} คิว",
     "queue_empty": "ไม่มีคิวค้างอยู่ พร้อมรับออเดอร์ใหม่",
     "queue_status_waiting": "รอทำ",
+    "queue_date_label": "วันที่",
     "queue_complete": "เสร็จแล้ว",
     "queue_cancel": "ยกเลิก",
     "alert_empty_cart": "กรุณาเลือกสินค้าอย่างน้อยหนึ่งรายการ",
@@ -174,7 +175,8 @@
     "list_count": "{n} รายการ",
     "list_empty": "ยังไม่มีออเดอร์ที่เสร็จแล้ว",
     "list_customer_fallback": "ลูกค้าหน้าร้าน",
-    "list_queue": "คิว"
+    "list_queue": "คิว",
+    "time_label": "เวลา"
   },
   "user": {
     "eyebrow": "Access Control",

@@ -153,9 +153,9 @@
     height: 44px;
     place-items: center;
     border-radius: 16px;
-    color: var(--brand-dark);
+    color: var(--brand);
     font-weight: 950;
-    background: #fff1d2;
+    background: var(--orange-soft);
   }
 
   .user-item div:nth-child(2) {

@@ -1,5 +1,6 @@
 <script>
   import { t } from "../lib/i18n.svelte.js";
+  import { formatThaiDateTime } from "../lib/dateUtils.js";
 
   let {
     products,
@@ -205,10 +206,12 @@
     {:else}
       <div class="queue-list">
         {#each pendingOrders as order (order.id)}
+          {@const orderTotal = order.items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0)}
+          {@const dt = formatThaiDateTime(order.created_at)}
           <article class="queue-card">
             <div class="queue-topline">
               <strong>#{order.queue_number}</strong>
-              <span>{t("order.queue_status_waiting")}</span>
+              <span class="queue-time">{dt.time} · {dt.date}</span>
             </div>
             {#if order.customer_name}
               <h3>{order.customer_name}</h3>
@@ -221,9 +224,12 @@
                 <span>{item.name} x {item.quantity}</span>
               {/each}
             </div>
-            <div class="order-actions">
-              <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "completed")}>{t("order.queue_complete")}</button>
-              <button class="danger-action" onclick={() => cancelOrder(order.id)}>{t("order.queue_cancel")}</button>
+            <div class="queue-footer">
+              <span class="queue-price">{orderTotal.toLocaleString()}฿</span>
+              <div class="order-actions">
+                <button class="secondary-action" onclick={() => updateOrderStatus(order.id, "completed")}>{t("order.queue_complete")}</button>
+                <button class="danger-action" onclick={() => cancelOrder(order.id)}>{t("order.queue_cancel")}</button>
+              </div>
             </div>
           </article>
         {/each}
@@ -279,10 +285,10 @@
     flex: 0 0 auto;
     border-radius: 999px;
     padding: 9px 13px;
-    color: var(--brand-dark);
+    color: var(--brand);
     font-size: 13px;
     font-weight: 900;
-    background: #fff1d2;
+    background: var(--orange-soft);
   }
 
   .products-grid {
@@ -306,8 +312,8 @@
 
   .product-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(242, 159, 5, 0.45);
-    box-shadow: 0 18px 36px rgba(45, 35, 26, 0.1);
+    border-color: rgba(255, 107, 107, 0.4);
+    box-shadow: 0 18px 36px rgba(26, 26, 46, 0.12);
   }
 
   .product-initial {
@@ -316,9 +322,9 @@
     height: 42px;
     place-items: center;
     border-radius: 15px;
-    color: var(--brand-dark);
+    color: var(--brand);
     font-weight: 950;
-    background: #fff1d2;
+    background: var(--orange-soft);
   }
 
   .product-name {
@@ -464,9 +470,9 @@
 
   .note-groups button.active,
   .note-options button.active {
-    color: #221707;
-    border-color: rgba(242, 159, 5, 0.55);
-    background: #fff1d2;
+    color: var(--brand);
+    border-color: rgba(255, 107, 107, 0.5);
+    background: var(--orange-soft);
   }
 
   .note-options {
@@ -557,10 +563,16 @@
   .queue-topline span {
     border-radius: 999px;
     padding: 6px 10px;
-    color: var(--brand-dark);
+    color: var(--brand);
     font-size: 12px;
     font-weight: 900;
-    background: #fff1d2;
+    background: var(--orange-soft);
+  }
+
+  .queue-time {
+    background: transparent !important;
+    color: var(--muted) !important;
+    padding: 0 !important;
   }
 
   .queue-card h3 {
@@ -572,10 +584,10 @@
     margin: 6px 0;
     border-radius: 14px;
     padding: 9px 10px;
-    color: var(--muted);
+    color: var(--purple);
     font-size: 13px;
     font-weight: 700;
-    background: rgba(33, 27, 22, 0.06);
+    background: var(--purple-soft);
   }
 
   .order-items {
@@ -588,17 +600,31 @@
   .order-items span {
     border-radius: 999px;
     padding: 6px 9px;
-    color: var(--muted);
+    color: var(--blue);
     font-size: 12px;
     font-weight: 800;
-    background: white;
+    background: var(--blue-soft);
+  }
+
+  .queue-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .queue-price {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--green);
   }
 
   .order-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-top: 14px;
   }
 
   @media (max-width: 1180px) {

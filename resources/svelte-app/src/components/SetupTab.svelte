@@ -393,7 +393,7 @@
     color: var(--ink);
     font-size: 12px;
     font-weight: 900;
-    background: #fff1d2;
+    background: var(--orange-soft);
   }
 
   .option-list button {
